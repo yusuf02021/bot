@@ -32,12 +32,44 @@ function getTaskPerson(taskKey, data) {
   return data.roommates[task.currentPersonIndex % data.roommates.length];
 }
 
+function isTaskDue(task, taskKey) {
+  const now = new Date();
+  
+  // Vanna - faqat yakshanba kuni
+  if (taskKey === 'bathroom') {
+    const isSunday = now.getDay() === 0; // 0 = yakshanba
+    if (!isSunday) return false;
+    
+    // Yakshanba, lekin bugun allaqachon qilinganmi?
+    if (task.lastDone) {
+      const lastDone = new Date(task.lastDone);
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const lastDay = new Date(lastDone.getFullYear(), lastDone.getMonth(), lastDone.getDate());
+      if (lastDay.getTime() === today.getTime()) return false; // Bugun qilingan
+    }
+    return true;
+  }
+  
+  // Boshqa tasklar - intervalDays bo'yicha
+  if (!task.lastDone) return true; // Hech qachon qilinmagan = due
+  
+  const lastDone = new Date(task.lastDone);
+  const lastDay = new Date(lastDone.getFullYear(), lastDone.getMonth(), lastDone.getDate());
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const daysDiff = Math.floor((today - lastDay) / (1000 * 60 * 60 * 24));
+  
+  return daysDiff >= task.intervalDays;
+}
+
 function getUserTasks(username, data) {
   const userTasks = [];
   for (const [key, task] of Object.entries(data.tasks)) {
     const person = getTaskPerson(key, data);
     if (person && person.username.toLowerCase() === username?.toLowerCase()) {
-      userTasks.push({ key, ...task });
+      // Only include if task is due or has penalty
+      if (isTaskDue(task, key) || task.isPenalty) {
+        userTasks.push({ key, ...task });
+      }
     }
   }
   return userTasks;
@@ -106,15 +138,29 @@ function formatStatus(data) {
     return '❌ Hech kim navbatda yo\'q. /join bilan qo\'shiling.';
   }
   
-  let msg = '📋 Hozirgi vazifalar:\n\n';
+  let msg = '📋 Bugungi vazifalar:\n\n';
+  let hasDueTasks = false;
+  
   for (const [key, task] of Object.entries(data.tasks)) {
     const person = getTaskPerson(key, data);
     const interval = task.intervalDays === 7 ? 'haftada 1' : `${task.intervalDays} kunda 1`;
     const penalty = task.isPenalty ? ' 🔴 JARIMA' : '';
-    msg += `${task.name}${penalty}\n`;
-    msg += `   👤 ${person?.name || '?'} (@${person?.username || '?'})\n`;
-    msg += `   ⏱ ${interval} marta\n\n`;
+    const isDue = isTaskDue(task, key) || task.isPenalty;
+    
+    if (isDue) {
+      hasDueTasks = true;
+      msg += `${task.name}${penalty}\n`;
+      msg += `   👤 ${person?.name || '?'} (@${person?.username || '?'})\n`;
+      msg += `   ⏱ ${interval} marta\n\n`;
+    }
   }
+  
+  if (!hasDueTasks) {
+    msg += '✨ Bugun hech qanday vazifa yo\'q!\n\n';
+  }
+  
+  msg += '━━━━━━━━━━━━━━━━━━━━━\n📅 Barcha vazifalar navbati: /fullstatus';
+  
   return msg;
 }
 
@@ -166,6 +212,31 @@ Vazifa kodlari: trash, sweeping, bathroom`);
 bot.command('status', (ctx) => {
   const data = loadData();
   ctx.reply(formatStatus(data));
+});
+
+// Full status - barcha vazifalar (due yoki yo'qligidan qat'i nazar)
+bot.command('fullstatus', (ctx) => {
+  const data = loadData();
+  if (data.roommates.length === 0) {
+    return ctx.reply('❌ Hech kim navbatda yo\'q. /join bilan qo\'shiling.');
+  }
+  
+  let msg = '📋 Barcha vazifalar navbati:\n\n';
+  for (const [key, task] of Object.entries(data.tasks)) {
+    const person = getTaskPerson(key, data);
+    const interval = task.intervalDays === 7 ? 'haftada 1' : `${task.intervalDays} kunda 1`;
+    const penalty = task.isPenalty ? ' 🔴 JARIMA' : '';
+    const isDue = isTaskDue(task, key) || task.isPenalty;
+    const dueStatus = isDue ? '⚠️ BAJARISH KERAK' : '✅ Yaqinda bajarildi';
+    const lastDone = task.lastDone ? new Date(task.lastDone).toLocaleDateString('uz-UZ') : 'hech qachon';
+    
+    msg += `${task.name}${penalty}\n`;
+    msg += `   👤 ${person?.name || '?'} (@${person?.username || '?'})\n`;
+    msg += `   ⏱ ${interval} marta\n`;
+    msg += `   📅 Oxirgi: ${lastDone}\n`;
+    msg += `   ${dueStatus}\n\n`;
+  }
+  return ctx.reply(msg);
 });
 
 bot.command('list', (ctx) => {
@@ -430,12 +501,18 @@ function sendReminder(hour) {
   const data = loadData();
   if (!data.groupChatIds?.length || data.roommates.length === 0) return;
   
+  // Faqat bugungi due vazifalarni ko'rsatish
   let taskList = '';
+  let hasDueTasks = false;
   for (const [key, task] of Object.entries(data.tasks)) {
+    if (!isTaskDue(task, key) && !task.isPenalty) continue; // Skip if not due
+    hasDueTasks = true;
     const person = getTaskPerson(key, data);
-    const penalty = task.isPenalty ? ' 🔴' : '';
+    const penalty = task.isPenalty ? ' 🔴 JARIMA' : '';
     taskList += `• ${task.name}${penalty}\n   👤 ${person?.name} (@${person?.username})\n\n`;
   }
+  
+  if (!hasDueTasks) return; // Hech narsa due emas - eslatma yubormaslik
   
   let msg = '';
   if (hour === 8) {
