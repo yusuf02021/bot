@@ -1,0 +1,25 @@
+{
+  "name": "cleaning-duty-bot",
+  "version": "1.0.0",
+  "description": "Telegram bot for apartment cleaning duty rotation",
+  "main": "index.js",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js"
+  },
+  "keywords": [
+    "telegram",
+    "bot",
+    "cleaning",
+    "rotation"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "node-cron": "^4.2.1",
+    "telegraf": "^4.16.3"
+  }
+}

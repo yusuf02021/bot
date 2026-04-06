@@ -1,0 +1,61 @@
+{
+  "roommates": [
+    {
+      "id": 1,
+      "name": "Jamshidbek",
+      "username": "Jamshidbek_Rasulov"
+    },
+    {
+      "id": 2,
+      "name": "Xojiakbar",
+      "username": "axmedov_xojiakbar"
+    },
+    {
+      "id": 3,
+      "name": "Oyatillo",
+      "username": "xvx_w7"
+    },
+    {
+      "id": 4,
+      "name": "Muhammadqodir",
+      "username": "Muhammadqodir_bro"
+    },
+    {
+      "id": 5,
+      "name": "Bahrom",
+      "username": "Shoh_Bahrom225"
+    }
+  ],
+  "tasks": {
+    "trash": {
+      "name": "🗑️ Axlat to'kish",
+      "intervalDays": 2,
+      "currentPersonIndex": 0,
+      "lastDone": null,
+      "isPenalty": false
+    },
+    "sweeping": {
+      "name": "🧹 Supurish",
+      "intervalDays": 2,
+      "currentPersonIndex": 1,
+      "lastDone": null,
+      "isPenalty": false
+    },
+    "bathroom": {
+      "name": "🚿 Vanna va hojatxona",
+      "intervalDays": 7,
+      "currentPersonIndex": 2,
+      "lastDone": null,
+      "isPenalty": false
+    }
+  },
+  "adminUsernames": [
+    "Jamshidbek_Rasulov"
+  ],
+  "triggerPhrases": [
+    "#done",
+    "bajarildi",
+    "tayyor"
+  ],
+  "groupChatIds": []
+}
