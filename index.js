@@ -367,6 +367,13 @@ bot.action(/^approve_(.+)_(.+)$/, (ctx) => {
   const task = data.tasks[taskKey];
   if (!task) return ctx.answerCbQuery('❌ Vazifa topilmadi!');
   
+  // dutyUsername bo'yicha tekshirish - callback'dagi username ishlatiladi
+  const dutyPerson = data.roommates.find(p => p.username.toLowerCase() === dutyUsername.toLowerCase());
+  if (!dutyPerson) {
+    return ctx.answerCbQuery('❌ Foydalanuvchi topilmadi!');
+  }
+  
+  // Hozirgi navbatchi hali ham shu odammi tekshirish
   const currentPerson = getTaskPerson(taskKey, data);
   if (!currentPerson || currentPerson.username.toLowerCase() !== dutyUsername.toLowerCase()) {
     return ctx.answerCbQuery('⚠️ Navbat allaqachon almashgan!');
@@ -379,7 +386,7 @@ bot.action(/^approve_(.+)_(.+)$/, (ctx) => {
   const result = rotateTask(taskKey, data);
   
   ctx.editMessageText(
-    `✅ ${currentPerson.name} ${task.name} vazifasini tugatdi!\n\n` +
+    `✅ ${dutyPerson.name} ${task.name} vazifasini tugatdi!\n\n` +
     `👍 ${approver} tasdiqladi.\n\n` +
     `🔄 Navbat almashdi!\n${task.name} → ${result.person.name} (@${result.person.username})`
   );
