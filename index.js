@@ -1,3 +1,4 @@
+require('dotenv').config();
 const { Telegraf, Markup } = require('telegraf');
 const fs = require('fs');
 const path = require('path');
@@ -357,7 +358,7 @@ bot.action(/^done_(.+)$/, (ctx) => {
   ctx.answerCbQuery();
 });
 
-bot.action(/^approve_(.+)_(.+)$/, (ctx) => {
+bot.action(/^approve_([^_]+)_(.+)$/, (ctx) => {
   const data = loadData();
   const approver = ctx.from.first_name || 'Kimdir';
   const approverUsername = ctx.from.username;

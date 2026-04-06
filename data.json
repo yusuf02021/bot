@@ -1,5 +1,11 @@
 {
-  "roommates": [],
+  "roommates": [
+    {
+      "id": 1,
+      "name": "Rasulov",
+      "username": "Jamshidbek_Rasulov"
+    }
+  ],
   "tasks": {
     "trash": {
       "name": "🗑️ Axlat to'kish",
@@ -12,7 +18,7 @@
       "name": "🧹 Supurish",
       "intervalDays": 2,
       "currentPersonIndex": 0,
-      "lastDone": null,
+      "lastDone": "2026-04-06T12:59:32.810Z",
       "isPenalty": false
     },
     "bathroom": {
@@ -23,7 +29,15 @@
       "isPenalty": false
     }
   },
-  "adminUsernames": ["Jamshidbek_Rasulov"],
-  "triggerPhrases": ["#done", "bajarildi", "tayyor"],
-  "groupChatIds": []
+  "adminUsernames": [
+    "Jamshidbek_Rasulov"
+  ],
+  "triggerPhrases": [
+    "#done",
+    "bajarildi",
+    "tayyor"
+  ],
+  "groupChatIds": [
+    -1003723065838
+  ]
 }
